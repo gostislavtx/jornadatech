@@ -71,7 +71,10 @@ void main() {
     await tester.pumpWidget(_host(const JornadaSplashScreen(
       minDuration: Duration(seconds: 10),
     )));
-    await tester.pump(const Duration(milliseconds: 2000));
+    // Os pontos mudam a cada 400 ms (6 s / 15). Lê no meio de um passo
+    // (2,2 s e 2,6 s), não na virada, para o teste não depender de
+    // arredondamento.
+    await tester.pump(const Duration(milliseconds: 2200));
     final dots = find.byKey(const ValueKey('loading-dots'));
     final first = tester.widget<Text>(dots).data;
     await tester.pump(const Duration(milliseconds: 400));
