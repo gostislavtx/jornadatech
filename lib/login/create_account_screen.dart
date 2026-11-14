@@ -57,9 +57,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       showAppSnack(context, 'Esse nome acabou de ser usado. Geramos outro.');
       return;
     }
+    // Variável não-nula para usar dentro do builder (closure).
+    final created = account;
     Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
       builder: (_) => RecoveryCodeScreen(
-        account: account,
+        account: created,
         onContinue: (user) => widget.onDone?.call(user),
       ),
     ));

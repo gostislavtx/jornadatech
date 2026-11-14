@@ -65,9 +65,11 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
       return;
     }
     // O código antigo deixa de valer: mostra o novo.
+    // Variável não-nula para usar dentro do builder (closure).
+    final created = account;
     Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
       builder: (_) => RecoveryCodeScreen(
-        account: account,
+        account: created,
         title: 'Senha redefinida!',
         onContinue: (user) => widget.onDone?.call(user),
       ),
