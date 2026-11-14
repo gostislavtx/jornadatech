@@ -17,7 +17,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
     final rows = await _client
         .from('trilhas')
         .select('*, aulas(*, conteudos_relacionados(*))')
-        .order('ordem');
+        .order('ordem', ascending: true);
     final progresso = await _client.from('progresso').select('aula_id, status');
     final status = {
       for (final p in progresso)
