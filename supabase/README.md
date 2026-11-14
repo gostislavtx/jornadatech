@@ -30,6 +30,12 @@ A recuperação de senha é feita pela função `redefinir_senha_com_codigo`, qu
 5. **Project Settings → API**: copie a **Project URL** e a chave **anon / publishable** e coloque em `lib/config/supabase_config.dart`.
 6. *(Opcional)* Conta de demonstração `CorujaAzul42`: siga as instruções no topo de [`conta_demo.sql`](conta_demo.sql).
 
+## Conteúdo das trilhas
+
+As aulas reais entram pela planilha de curadoria: veja [`conteudo/README.md`](../conteudo/README.md). Antes da primeira importação, rode [`migracoes/002_importacao_conteudo.sql`](migracoes/002_importacao_conteudo.sql).
+
+## Migrações
+
 Mudanças no banco depois da primeira configuração ficam em [`migracoes/`](migracoes/), numeradas na ordem em que devem ser rodadas.
 
 A chave **anon/publishable** pode ir no app: quem protege os dados são as regras de segurança (RLS) do `schema.sql`. A chave **service_role / secret nunca** vai no app nem no GitHub.
