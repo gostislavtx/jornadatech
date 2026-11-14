@@ -38,11 +38,25 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    final account = await widget.auth.resetPassword(
-      username: _userCtrl.text,
-      recoveryCode: _codeCtrl.text,
-      newPassword: _passCtrl.text,
-    );
+    final AccountWithCode? account;
+    try {
+      account = await widget.auth.resetPassword(
+        username: _userCtrl.text,
+        recoveryCode: _codeCtrl.text,
+        newPassword: _passCtrl.text,
+      );
+    } on AuthBlockedException {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showAppSnack(context,
+          'Muitas tentativas erradas. Tente de novo em 15 minutos.');
+      return;
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showAppSnack(context, 'Sem conexão com o servidor. Tente de novo.');
+      return;
+    }
     if (!mounted) return;
     setState(() => _loading = false);
 

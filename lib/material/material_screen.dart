@@ -2,24 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/catalog.dart';
+import '../data/catalog_repository.dart';
 import '../ui/app_tokens.dart';
 import '../ui/app_widgets.dart';
 
 /// Tela 03 do Figma — Material da trilha (aula atual).
 class MaterialScreen extends StatefulWidget {
-  const MaterialScreen({super.key, required this.trilha});
+  const MaterialScreen({super.key, required this.trilha, this.catalog});
 
   final Trilha trilha;
+
+  /// Onde gravar o progresso. Padrão: [CatalogRepository.shared].
+  final CatalogRepository? catalog;
 
   @override
   State<MaterialScreen> createState() => _MaterialScreenState();
 }
 
 class _MaterialScreenState extends State<MaterialScreen> {
-  LessonStatus _status = LessonStatus.naoVisto;
+  late LessonStatus _status = widget.trilha.currentLesson.status;
   bool _savedOffline = false;
 
   Lesson get _lesson => widget.trilha.currentLesson;
+
+  CatalogRepository get _catalog => widget.catalog ?? CatalogRepository.shared;
+
+  /// Marca na hora e grava no banco; se falhar, volta ao anterior e avisa.
+  Future<void> _setStatus(LessonStatus status) async {
+    final previous = _status;
+    setState(() => _status = status);
+    try {
+      await _catalog.setLessonStatus(_lesson, status);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _status = previous);
+      showAppSnack(context, 'Não foi possível salvar o progresso.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +264,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
           key: ValueKey('status-${s.name}'),
           customBorder: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14)),
-          onTap: () => setState(() => _status = s),
+          onTap: () => _setStatus(s),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(

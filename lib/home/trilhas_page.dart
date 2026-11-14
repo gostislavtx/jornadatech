@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../data/auth_repository.dart';
 import '../data/catalog.dart';
-import '../material/material_screen.dart';
 import '../ui/app_tokens.dart';
 import '../ui/app_widgets.dart';
 
@@ -14,14 +13,24 @@ class TrilhasPage extends StatefulWidget {
     required this.trilhas,
     required this.favorites,
     required this.onToggleFavorite,
+    required this.onOpenTrilha,
     required this.onMenu,
+    this.error = false,
+    this.onRetry,
   });
 
   final AppUser user;
-  final List<Trilha> trilhas;
+
+  /// `null` enquanto carrega do banco.
+  final List<Trilha>? trilhas;
   final Set<String> favorites;
   final ValueChanged<String> onToggleFavorite;
+  final ValueChanged<Trilha> onOpenTrilha;
   final VoidCallback onMenu;
+
+  /// Falhou ao carregar (ex.: sem internet).
+  final bool error;
+  final VoidCallback? onRetry;
 
   @override
   State<TrilhasPage> createState() => _TrilhasPageState();
@@ -41,7 +50,7 @@ class _TrilhasPageState extends State<TrilhasPage> {
   List<Trilha> get _visible {
     final query = _normalize(_searchCtrl.text);
     return [
-      for (final t in widget.trilhas)
+      for (final t in widget.trilhas ?? const <Trilha>[])
         if (_filters.every(t.tags.contains) &&
             (query.isEmpty ||
                 _normalize('${t.title} ${t.origin}').contains(query)))
@@ -93,7 +102,22 @@ class _TrilhasPageState extends State<TrilhasPage> {
               Text('Curadoria feita a partir da sua ementa',
                   style: AppText.manrope(12, height: 16)),
               const SizedBox(height: 16),
-              if (visible.isEmpty)
+              if (widget.error)
+                _message(
+                  'Não foi possível carregar as trilhas. Confira a internet.',
+                  action: TextButton(
+                    onPressed: widget.onRetry,
+                    child: const Text('Tentar de novo'),
+                  ),
+                )
+              else if (widget.trilhas == null)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.orange),
+                  ),
+                )
+              else if (visible.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Text(
@@ -107,11 +131,7 @@ class _TrilhasPageState extends State<TrilhasPage> {
                   trilha: t,
                   favorite: widget.favorites.contains(t.id),
                   onToggleFavorite: () => widget.onToggleFavorite(t.id),
-                  onOpen: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => MaterialScreen(trilha: t),
-                    ),
-                  ),
+                  onOpen: () => widget.onOpenTrilha(t),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -119,6 +139,20 @@ class _TrilhasPageState extends State<TrilhasPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _message(String text, {Widget? action}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Column(
+        children: [
+          Text(text,
+              textAlign: TextAlign.center,
+              style: AppText.manrope(14, height: 20)),
+          if (action != null) action,
+        ],
+      ),
     );
   }
 

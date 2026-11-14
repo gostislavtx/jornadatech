@@ -46,7 +46,15 @@ class _JornadaLoginScreenState extends State<JornadaLoginScreen> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    final result = await _auth.login(_userCtrl.text, _passCtrl.text);
+    final LoginResult result;
+    try {
+      result = await _auth.login(_userCtrl.text, _passCtrl.text);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showAppSnack(context, 'Sem conexão com o servidor. Tente de novo.');
+      return;
+    }
     if (!mounted) return;
     setState(() => _loading = false);
 

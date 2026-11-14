@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jornadatech/data/auth_repository.dart';
+import 'package:jornadatech/data/catalog_repository.dart';
 import 'package:jornadatech/home/home_shell.dart';
 
 const _ana = AppUser(username: 'CorujaAzul42');
@@ -10,8 +11,15 @@ Future<void> _pumpHome(WidgetTester tester, {VoidCallback? onLogout}) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
-    MaterialApp(home: HomeShell(user: _ana, onLogout: onLogout)),
+    MaterialApp(
+      home: HomeShell(
+        user: _ana,
+        catalog: MockCatalogRepository(),
+        onLogout: onLogout,
+      ),
+    ),
   );
+  await tester.pump(); // carrega as trilhas do repositório
 }
 
 void main() {

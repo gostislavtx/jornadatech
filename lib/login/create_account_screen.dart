@@ -39,7 +39,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    final account = await widget.auth.signUp(_username, _passCtrl.text);
+    final AccountWithCode? account;
+    try {
+      account = await widget.auth.signUp(_username, _passCtrl.text);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showAppSnack(context, 'Não foi possível criar a conta. Tente de novo.');
+      return;
+    }
     if (!mounted) return;
     setState(() => _loading = false);
 

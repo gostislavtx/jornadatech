@@ -13,13 +13,19 @@ enum TrilhaFilter {
 
 /// Situação de uma aula para o aluno ("Meu progresso").
 enum LessonStatus {
-  naoVisto('Não visto', Icons.radio_button_unchecked),
-  visto('Visto', Icons.visibility_outlined),
-  concluido('Concluído', Icons.check_rounded);
+  naoVisto('Não visto', Icons.radio_button_unchecked, 'nao_visto'),
+  visto('Visto', Icons.visibility_outlined, 'visto'),
+  concluido('Concluído', Icons.check_rounded, 'concluido');
 
-  const LessonStatus(this.label, this.icon);
+  const LessonStatus(this.label, this.icon, this.dbValue);
   final String label;
   final IconData icon;
+
+  /// Valor gravado na coluna `progresso.status` do banco.
+  final String dbValue;
+
+  static LessonStatus fromDb(String? value) => LessonStatus.values
+      .firstWhere((s) => s.dbValue == value, orElse: () => naoVisto);
 }
 
 /// Conteúdo extra em "Continue nesta trilha".
@@ -42,7 +48,15 @@ class Lesson {
     required this.syllabus,
     required this.related,
     this.isVideo = true,
+    this.id,
+    this.status = LessonStatus.naoVisto,
   });
+
+  /// Id da aula no banco (`aulas.id`); `null` nos dados de exemplo.
+  final String? id;
+
+  /// Situação desta aula para o aluno logado.
+  final LessonStatus status;
 
   final int number;
   final String title;
