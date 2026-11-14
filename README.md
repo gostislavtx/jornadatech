@@ -47,7 +47,7 @@ Pesquisa aplicada e exploratória, conduzida pela abordagem **Design Science Res
 | Tela | O que tem | Status |
 |---|---|---|
 | Splash | Logo animado, degradê da marca e respeito a "reduzir movimento" | ✅ |
-| 01 · Login | Nome completo + senha (RF001); primeiro acesso por CPF com troca de senha obrigatória (RF002/RF003) | ✅ (mock) |
+| 01 · Login | Nome de usuário aleatório + senha, criar conta, código de recuperação e "Esqueci minha senha", sem dados pessoais ([LGPD](#privacidade-e-lgpd)) | ✅ (mock) |
 | 02 · Home | Trilhas recomendadas com progresso, busca, filtros (grátis, certificado, vídeo, offline) e favoritos | ✅ (mock) |
 | Menu | Perfil, Ajuda e Sair | 🟡 Perfil ainda não existe |
 | Ajuda | Como a trilha é montada e tutorial de uso | 🟡 vídeo pendente |
@@ -55,14 +55,31 @@ Pesquisa aplicada e exploratória, conduzida pela abordagem **Design Science Res
 
 > **Mock:** por enquanto, usuários, trilhas e progresso ficam em memória (`lib/data/`). Ao fechar o app, tudo volta ao estado inicial.
 
-### Usuários de teste
+### Conta de teste
 
-| Nome completo | CPF | Senha inicial |
+| Nome de usuário | Senha | Código de recuperação |
 |---|---|---|
-| Ana Beatriz Ribeiro da Silva | 529.982.247-25 | `Mudar@123` |
-| Carlos Eduardo Santos | 111.444.777-35 | `Mudar@123` |
+| `CorujaAzul42` | `trilha2026` | `K7M2-QX9P` |
 
-No primeiro login com a senha padrão, ou pelo card "Primeiro acesso" com o CPF, o app pede uma senha nova: 8 ou mais caracteres, com letras e números, diferente da padrão.
+Também dá para criar uma conta nova pelo botão **Criar conta** na tela de login.
+
+## Privacidade e LGPD
+
+O Projeto Metamorfose atende a comunidade, incluindo crianças e adolescentes. Por isso, o JornadaTech segue o princípio da **minimização de dados** da LGPD e **não coleta dados pessoais**. *(Ideia proposta por Leonardo Severino Ruschel.)*
+
+| O que o app **não** pede | Como funciona no lugar |
+|---|---|
+| Nome real | O app gera um **nome de usuário aleatório** (ex.: `CorujaAzul42`, no estilo Xbox/PlayStation). O aluno pode pedir outro, mas não digita um nome livre, para não acabar usando o próprio nome |
+| CPF ou documento | Não é usado em nenhuma etapa |
+| E-mail | A recuperação de senha usa um **código de recuperação** (ex.: `K7M2-QX9P`), mostrado uma única vez ao criar a conta |
+
+**Criar conta:** o app sugere o nome de usuário → o aluno cria a senha (8+ caracteres, com letras e números) → o app mostra o nome e o código de recuperação, e o aluno confirma que guardou (anotou ou tirou print).
+
+**Esqueci minha senha:** nome de usuário + código de recuperação + nova senha. O código antigo deixa de valer e o app mostra um novo.
+
+**Perdeu também o código?** O professor ou monitor da turma do Metamorfose, que conhece os alunos, redefine a senha *(a ser implementado junto com o back-end)*.
+
+No back-end (Supabase), a senha e o código ficam guardados só como **hash**, nunca em texto puro. O app também não tem foto de perfil, chat nem campos de texto livre.
 
 ## Tecnologias
 
@@ -95,13 +112,13 @@ flutter run            # ou: flutter run -d chrome
 lib/
 ├── main.dart                     # splash → login → área logada
 ├── splash/                       # splash animado e logo desenhado em código
-├── login/jornada_login_screen.dart   # tela 01: login, primeiro acesso, nova senha
+├── login/                        # tela 01: login, criar conta, código de recuperação, esqueci a senha
 ├── home/
 │   ├── home_shell.dart           # abas Trilhas/Ajuda + menu lateral
 │   ├── trilhas_page.dart         # tela 02: trilhas, busca, filtros, favoritos
 │   └── ajuda_page.dart           # aba Ajuda
 ├── material/material_screen.dart # tela 03: material da trilha
-├── data/                         # mocks (auth, trilhas) e validação de CPF
+├── data/                         # mocks (auth, trilhas) e gerador de nome de usuário
 └── ui/                           # cores, textos e componentes do Figma
 test/                             # testes de widget (splash, login, home)
 docs/                             # banner e protótipo
@@ -117,7 +134,7 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 |---|---|---|
 | Andrius Nazario | `@___` | _a preencher_ |
 | Giovane Antunes Boaro | `@___` | _a preencher_ |
-| Leonardo Severino Ruschel | `@___` | _a preencher_ |
+| Leonardo Severino Ruschel | `@___` | Proposta do login sem dados pessoais (LGPD); _a preencher_ |
 | Luiz Gustavo Bonapaz Teixeira | `@gostislavtx` | Início do desenvolvimento do app em Flutter a partir do protótipo do Figma; criação e organização do repositório e do README; _a completar_ |
 | Maruan Farid Linden | `@___` | _a preencher_ |
 
@@ -141,7 +158,8 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 ## Próximos passos
 
 - [ ] Rodar `flutter analyze` e `flutter test` na máquina de todos e corrigir o que aparecer
-- [ ] Back-end / banco de dados para usuários, trilhas e progresso (ex.: Firebase ou Supabase)
+- [ ] Back-end no Supabase para contas, trilhas e progresso (senha e código só como hash)
+- [ ] Redefinição de senha pelo professor/monitor da turma
 - [ ] Cadastro das trilhas reais a partir da curadoria (confiabilidade, gratuidade, atualização, dificuldade)
 - [ ] Tela de Perfil
 - [ ] Download real para estudo offline
