@@ -2,6 +2,8 @@
 
 > 🏆 **1º lugar na XX Mostra de Iniciação Científica do Cesuca (2026)**
 
+**▶ Ver o app funcionando:** https://gostislavtx.github.io/jornadatech/ (conta de teste: `CorujaAzul42` / `trilha2026`)
+
 O JornadaTech é um app em Flutter (mobile e web) que organiza **conteúdos gratuitos de tecnologia** em **trilhas progressivas de aprendizagem**. Ele faz a ponte entre a ementa das aulas do Cesuca / Projeto Metamorfose Digital e o conteúdo aberto que a aprofunda. Assim, os participantes continuam estudando depois das aulas e acompanham o próprio progresso.
 
 Contribui para o **ODS 4** (Educação de Qualidade) e o **ODS 10** (Redução das Desigualdades).
@@ -165,7 +167,7 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 - [ ] Download real para estudo offline
 - [ ] Vídeo do tutorial na aba Ajuda
 - [ ] Envio de feedback de link quebrado
-- [ ] Publicar a versão web para demonstração
+- [x] Publicar a versão web para demonstração (GitHub Pages, atualiza a cada merge na `main`)
 
 ## Documentos
 
