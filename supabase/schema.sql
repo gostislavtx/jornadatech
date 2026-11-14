@@ -127,8 +127,13 @@ language plpgsql
 security definer set search_path = ''
 as $$
 begin
+  -- Sem o nome nos metadados (ex.: conta criada pelo painel), usa a parte
+  -- antes do @ do e-mail interno.
   insert into public.perfis (id, nome_usuario)
-  values (new.id, new.raw_user_meta_data ->> 'nome_usuario');
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'nome_usuario', split_part(new.email, '@', 1))
+  );
   return new;
 end;
 $$;
