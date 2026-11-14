@@ -26,8 +26,15 @@ class AuthScaffold extends StatelessWidget {
         title: Text(title,
             style: AppText.sora(18, color: AppColors.onPrimary)),
         foregroundColor: AppColors.onPrimary,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(gradient: AppColors.headerGradient),
+        iconTheme: const IconThemeData(color: AppColors.onPrimary),
+        // Fundo azul de garantia: se o degradê não for desenhado, o texto e a
+        // seta brancos continuam legíveis.
+        backgroundColor: AppColors.blue,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: const SizedBox.expand(
+          child: DecoratedBox(
+            decoration: BoxDecoration(gradient: AppColors.headerGradient),
+          ),
         ),
       ),
       body: Center(
