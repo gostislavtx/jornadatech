@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/auth_repository.dart';
-import '../data/cpf.dart';
 import '../splash/widgets/jornada_logo.dart';
 import '../ui/app_tokens.dart';
 import '../ui/app_widgets.dart';
+import 'auth_scaffold.dart';
+import 'create_account_screen.dart';
+import 'recover_password_screen.dart';
 
-/// Tela 01 do Figma — Login / primeiro acesso.
+/// Tela 01 — Login.
 ///
-/// RF001: entrar com nome completo + senha.
-/// RF003: primeiro acesso confirmado pelo CPF, com troca de senha obrigatória.
+/// LGPD: o aluno entra com um nome de usuário aleatório + senha. O app não
+/// pede nome real, CPF nem e-mail (o Metamorfose atende crianças e
+/// adolescentes, então coletamos o mínimo possível).
 class JornadaLoginScreen extends StatefulWidget {
   const JornadaLoginScreen({super.key, this.onLoggedIn, this.auth});
 
-  /// Chamado quando o login (ou a troca de senha do primeiro acesso) termina.
+  /// Chamado quando o aluno entra (login, conta nova ou senha redefinida).
   final ValueChanged<AppUser>? onLoggedIn;
 
   /// Padrão: [AuthRepository.shared]. Os testes passam uma instância nova.
@@ -26,19 +29,16 @@ class JornadaLoginScreen extends StatefulWidget {
 
 class _JornadaLoginScreenState extends State<JornadaLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _cpfFormKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
+  final _userCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
-  final _cpfCtrl = TextEditingController();
-  bool _loading = false, _obscure = true, _verifyingCpf = false;
+  bool _loading = false;
 
   AuthRepository get _auth => widget.auth ?? AuthRepository.shared;
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
+    _userCtrl.dispose();
     _passCtrl.dispose();
-    _cpfCtrl.dispose();
     super.dispose();
   }
 
@@ -46,43 +46,20 @@ class _JornadaLoginScreenState extends State<JornadaLoginScreen> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    final result = await _auth.login(_nameCtrl.text, _passCtrl.text);
+    final result = await _auth.login(_userCtrl.text, _passCtrl.text);
     if (!mounted) return;
     setState(() => _loading = false);
 
     switch (result) {
       case LoginInvalid():
-        showAppSnack(context, 'Nome completo ou senha incorretos.');
-      case LoginNeedsNewPassword(:final user):
-        _openChangePassword(user);
+        showAppSnack(context, 'Nome de usuário ou senha incorretos.');
       case LoginOk(:final user):
         widget.onLoggedIn?.call(user);
     }
   }
 
-  Future<void> _verifyCpf() async {
-    FocusScope.of(context).unfocus();
-    if (!_cpfFormKey.currentState!.validate()) return;
-    setState(() => _verifyingCpf = true);
-    final user = await _auth.findFirstAccessByCpf(_cpfCtrl.text);
-    if (!mounted) return;
-    setState(() => _verifyingCpf = false);
-
-    if (user == null) {
-      showAppSnack(context, 'CPF não encontrado ou já tem senha definida.');
-    } else {
-      _openChangePassword(user);
-    }
-  }
-
-  void _openChangePassword(AppUser user) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => ChangePasswordScreen(
-        user: user,
-        auth: _auth,
-        onDone: widget.onLoggedIn,
-      ),
-    ));
+  void _open(Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   @override
@@ -168,7 +145,7 @@ class _JornadaLoginScreenState extends State<JornadaLoginScreen> {
 
   Widget _form() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Form(
           key: _formKey,
@@ -177,280 +154,160 @@ class _JornadaLoginScreenState extends State<JornadaLoginScreen> {
             children: [
               Text('Entrar', style: AppText.sora(18, height: 28)),
               const SizedBox(height: 4),
-              Text('Use o mesmo nome completo do cadastro no projeto.',
+              Text('Use o nome de usuário que o app criou para você.',
                   style: AppText.manrope(14, height: 20)),
               const SizedBox(height: 24),
-              Text('NOME COMPLETO', style: AppText.label()),
+              Text('NOME DE USUÁRIO', style: AppText.label()),
               const SizedBox(height: 8),
               TextFormField(
-                key: const ValueKey('login-name'),
-                controller: _nameCtrl,
+                key: const ValueKey('login-username'),
+                controller: _userCtrl,
                 enabled: !_loading,
-                textCapitalization: TextCapitalization.words,
+                autocorrect: false,
                 textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.name],
+                autofillHints: const [AutofillHints.username],
                 style: AppText.manrope(14, color: AppColors.text, height: 20),
                 decoration: appFieldDecoration(
-                  hintText: 'Seu nome completo',
+                  hintText: 'Ex.: CorujaAzul42',
                   icon: Icons.person_outline_rounded,
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Informe seu nome' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Informe seu nome de usuário'
+                    : null,
               ),
               const SizedBox(height: 16),
-              Text('SENHA', style: AppText.label()),
-              const SizedBox(height: 8),
-              TextFormField(
-                key: const ValueKey('login-password'),
+              PasswordField(
+                label: 'Senha',
+                fieldKey: const ValueKey('login-password'),
                 controller: _passCtrl,
                 enabled: !_loading,
-                obscureText: _obscure,
                 textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _submit(),
-                autofillHints: const [AutofillHints.password],
-                style: AppText.manrope(14, color: AppColors.text, height: 20),
-                decoration: appFieldDecoration(
-                  hintText: '••••••••',
-                  icon: Icons.lock_outline_rounded,
-                  suffix: IconButton(
-                    tooltip: _obscure ? 'Mostrar senha' : 'Esconder senha',
-                    icon: Icon(
-                      _obscure
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 18,
-                      color: AppColors.muted,
-                    ),
-                    onPressed: () => setState(() => _obscure = !_obscure),
-                  ),
-                ),
+                onSubmitted: (_) => _submit(),
                 validator: (v) =>
                     (v == null || v.isEmpty) ? 'Informe sua senha' : null,
               ),
-              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _open(RecoverPasswordScreen(
+                            auth: _auth,
+                            onDone: widget.onLoggedIn,
+                          )),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.blue,
+                    textStyle: AppText.manrope(12,
+                        weight: FontWeight.w700, height: 16),
+                  ),
+                  child: const Text('Esqueci minha senha'),
+                ),
+              ),
+              const SizedBox(height: 8),
               PrimaryButton('Acessar minhas trilhas',
                   loading: _loading, onPressed: _submit),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        _firstAccessCard(),
+        _signUpCard(),
         const SizedBox(height: 20),
-        _odsNote(),
+        _footnote(),
       ],
     );
   }
 
-  /// RF003: card "Primeiro acesso" (borda tracejada laranja).
-  Widget _firstAccessCard() {
+  /// Card "Primeira vez aqui?" (borda tracejada laranja, como no Figma).
+  Widget _signUpCard() {
     return DashedBorderBox(
       color: const Color(0x80EA4A00),
       background: AppColors.orangeSoft,
       padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _cpfFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.fingerprint_rounded,
-                    size: 16, color: AppColors.accentInk),
-                const SizedBox(width: 8),
-                Text('Primeiro acesso',
-                    style: AppText.sora(14,
-                        color: AppColors.accentInk, height: 20)),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Confirmamos sua identidade pelo CPF e você define uma nova senha.',
-              style: AppText.manrope(12,
-                  color: const Color(0xCC921300), height: 16),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              key: const ValueKey('login-cpf'),
-              controller: _cpfCtrl,
-              enabled: !_verifyingCpf,
-              keyboardType: TextInputType.number,
-              inputFormatters: [CpfInputFormatter()],
-              onFieldSubmitted: (_) => _verifyCpf(),
-              style: AppText.manrope(14, color: AppColors.text, height: 20),
-              decoration: InputDecoration(
-                hintText: 'CPF 000.000.000-00',
-                hintStyle:
-                    AppText.manrope(14, color: AppColors.text, height: 20),
-                filled: true,
-                fillColor: Colors.white,
-                isDense: true,
-                contentPadding: const EdgeInsets.fromLTRB(12, 10, 0, 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-                errorStyle:
-                    AppText.manrope(12, color: AppColors.accentInk),
-                suffixIcon: _verifyingCpf
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: AppColors.orange),
-                        ),
-                      )
-                    : TextButton(
-                        onPressed: _verifyCpf,
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.orange,
-                          textStyle: AppText.sora(12, height: 16),
-                        ),
-                        child: const Text('Verificar'),
-                      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.person_add_alt_rounded,
+                  size: 16, color: AppColors.accentInk),
+              const SizedBox(width: 8),
+              Text('Primeira vez aqui?',
+                  style: AppText.sora(14,
+                      color: AppColors.accentInk, height: 20)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Crie sua conta em poucos segundos, sem informar nome, CPF ou '
+            'e-mail.',
+            style: AppText.manrope(12,
+                color: const Color(0xCC921300), height: 16),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 40,
+            child: FilledButton(
+              onPressed: _loading
+                  ? null
+                  : () => _open(CreateAccountScreen(
+                        auth: _auth,
+                        onDone: widget.onLoggedIn,
+                      )),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.orange,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                textStyle: AppText.sora(13, height: 16),
               ),
-              validator: (v) => isValidCpf(v ?? '') ? null : 'CPF inválido',
+              child: const Text('Criar conta'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _footnote() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.verified_user_outlined,
+                size: 14, color: AppColors.muted),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Não coletamos dados pessoais (LGPD)',
+                textAlign: TextAlign.center,
+                style: AppText.manrope(11, height: 16.5),
+              ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _odsNote() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 2),
-          child: Icon(Icons.eco_outlined, size: 14, color: AppColors.muted),
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            'Educação de qualidade (ODS 4) e redução de desigualdades (ODS 10)',
-            textAlign: TextAlign.center,
-            style: AppText.manrope(11, height: 16.5),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// RF003: troca de senha obrigatória no primeiro acesso.
-class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({
-    super.key,
-    required this.user,
-    required this.auth,
-    this.onDone,
-  });
-
-  final AppUser user;
-  final AuthRepository auth;
-  final ValueChanged<AppUser>? onDone;
-
-  @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
-}
-
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _newPassCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
-  bool _loading = false;
-
-  @override
-  void dispose() {
-    _newPassCtrl.dispose();
-    _confirmCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    FocusScope.of(context).unfocus();
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
-    await widget.auth.setNewPassword(widget.user, _newPassCtrl.text);
-    if (!mounted) return;
-    setState(() => _loading = false);
-    widget.onDone?.call(widget.user);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('Nova senha',
-            style: AppText.sora(18, color: AppColors.onPrimary)),
-        foregroundColor: AppColors.onPrimary,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(gradient: AppColors.headerGradient),
-        ),
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Defina sua nova senha',
-                      style: AppText.sora(18, height: 28)),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Olá, ${widget.user.displayName}! Mínimo de 8 caracteres, '
-                    'com letras e números.',
-                    style: AppText.manrope(14, height: 20),
-                  ),
-                  const SizedBox(height: 24),
-                  Text('NOVA SENHA', style: AppText.label()),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    key: const ValueKey('new-password'),
-                    controller: _newPassCtrl,
-                    enabled: !_loading,
-                    obscureText: true,
-                    style:
-                        AppText.manrope(14, color: AppColors.text, height: 20),
-                    decoration:
-                        appFieldDecoration(icon: Icons.lock_outline_rounded),
-                    validator: (v) =>
-                        AuthRepository.validateNewPassword(v ?? ''),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('CONFIRMAR SENHA', style: AppText.label()),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    key: const ValueKey('confirm-password'),
-                    controller: _confirmCtrl,
-                    enabled: !_loading,
-                    obscureText: true,
-                    onFieldSubmitted: (_) => _submit(),
-                    style:
-                        AppText.manrope(14, color: AppColors.text, height: 20),
-                    decoration:
-                        appFieldDecoration(icon: Icons.lock_outline_rounded),
-                    validator: (v) => v != _newPassCtrl.text
-                        ? 'As senhas não coincidem'
-                        : null,
-                  ),
-                  const SizedBox(height: 24),
-                  PrimaryButton('Salvar e continuar',
-                      loading: _loading, onPressed: _submit),
-                ],
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Icon(Icons.eco_outlined, size: 14, color: AppColors.muted),
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Educação de qualidade (ODS 4) e redução de desigualdades '
+                '(ODS 10)',
+                textAlign: TextAlign.center,
+                style: AppText.manrope(11, height: 16.5),
               ),
             ),
-          ),
+          ],
         ),
-      ),
+      ],
     );
   }
 }
