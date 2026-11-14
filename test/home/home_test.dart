@@ -3,8 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jornadatech/data/auth_repository.dart';
 import 'package:jornadatech/home/home_shell.dart';
 
-const _ana =
-    AppUser(fullName: 'Ana Beatriz Ribeiro da Silva', cpf: '52998224725');
+const _ana = AppUser(username: 'CorujaAzul42');
 
 Future<void> _pumpHome(WidgetTester tester, {VoidCallback? onLogout}) async {
   tester.view.physicalSize = const Size(390, 844);
@@ -21,7 +20,7 @@ void main() {
     await _pumpHome(tester);
 
     expect(find.text('Bom estudo,'), findsOneWidget);
-    expect(find.text('Ana Beatriz'), findsOneWidget);
+    expect(find.text('CorujaAzul42'), findsOneWidget);
     expect(find.text('Lógica de Programação'), findsOneWidget);
     expect(find.text('9 de 12 itens'), findsOneWidget);
     expect(find.text('75% concluído'), findsOneWidget);
