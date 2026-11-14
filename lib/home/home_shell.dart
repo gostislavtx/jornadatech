@@ -114,18 +114,25 @@ class _BottomNav extends StatelessWidget {
       child: InkResponse(
         onTap: () => onSelect(i),
         radius: 36,
-        child: SizedBox(
-          width: 64,
-          height: 48,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(height: 4),
-              Text(label,
-                  style: AppText.manrope(10,
-                      weight: FontWeight.w600, color: color, height: 15)),
-            ],
+        // Sem largura/altura fixas: o rótulo não pode quebrar em duas linhas
+        // (fonte maior, acessibilidade) e estourar o espaço.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 64, minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 20, color: color),
+                const SizedBox(height: 4),
+                Text(label,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: AppText.manrope(10,
+                        weight: FontWeight.w600, color: color, height: 15)),
+              ],
+            ),
           ),
         ),
       ),
