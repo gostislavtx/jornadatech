@@ -1,0 +1,10 @@
+# Tela do sistema antes do Flutter abrir: só a cor do topo do degradê,
+# sem logo, para emendar direto no splash animado.
+# Rode `dart run flutter_native_splash:create` depois de mudar.
+flutter_native_splash:
+  color: "#16287A"
+  android_12:
+    # No Android 12+ o sistema sempre mostra o ícone do app nesta tela.
+    color: "#16287A"
+    icon_background_color: "#16287A"
+  web: false
