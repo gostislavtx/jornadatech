@@ -1,11 +1,11 @@
 {
-    "name": "jornadatech",
-    "short_name": "jornadatech",
+    "name": "JornadaTech",
+    "short_name": "JornadaTech",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#16287A",
+    "theme_color": "#08348A",
+    "description": "Trilhas de aprendizagem com conteúdo aberto e gratuito de tecnologia — Cesuca · Metamorfose.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
