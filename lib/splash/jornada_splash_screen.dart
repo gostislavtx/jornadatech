@@ -145,18 +145,26 @@ class _JornadaSplashScreenState extends State<JornadaSplashScreen>
             SafeArea(
               child: _FitOrScroll(
                 padding: const EdgeInsets.fromLTRB(32, 48, 32, 40),
+                // Sobra de espaço vai igualmente acima e abaixo do bloco
+                // central; o carregamento fica no rodapé.
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Spacer(),
-                    _logoBlock(),
-                    const SizedBox(height: 28),
-                    _eyebrowText(),
-                    const SizedBox(height: 10),
-                    _titleText(),
-                    const SizedBox(height: 16),
-                    _taglineWords(),
-                    const Spacer(),
+                    const SizedBox.shrink(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _logoBlock(),
+                        const SizedBox(height: 28),
+                        _eyebrowText(),
+                        const SizedBox(height: 10),
+                        _titleText(),
+                        const SizedBox(height: 16),
+                        _taglineWords(),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                     _loadingBlock(),
                   ],
                 ),
@@ -247,18 +255,22 @@ class _JornadaSplashScreenState extends State<JornadaSplashScreen>
       opacity: _eyebrow,
       child: AnimatedBuilder(
         animation: _eyebrow,
-        builder: (context, _) => Text(
-          'CESUCA · METAMORFOSE',
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.visible,
-          style: TextStyle(
-            fontFamily: kJornadaFont,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 12 * (0.45 - 0.27 * _eyebrow.value),
-            color: const Color(0xD1FFFFFF),
+        // scaleDown: em tela estreita ou fonte grande a etiqueta diminui em
+        // vez de passar da borda.
+        builder: (context, _) => FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'CESUCA · METAMORFOSE',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            softWrap: false,
+            style: TextStyle(
+              fontFamily: kJornadaFont,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 12 * (0.45 - 0.27 * _eyebrow.value),
+              color: const Color(0xD1FFFFFF),
+            ),
           ),
         ),
       ),
@@ -374,23 +386,40 @@ class _JornadaSplashScreenState extends State<JornadaSplashScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Preparando suas trilhas', style: _labelStyle),
-                // Largura fixa para o texto não "pular" quando os pontos mudam.
-                SizedBox(
-                  width: 18,
-                  child: AnimatedBuilder(
-                    animation: _ambient,
-                    builder: (context, _) {
-                      final count = _reduceMotion
-                          ? 3
-                          : (_ambient.value * 15).floor() % 4;
-                      return Text(
-                        '.' * count,
-                        key: const ValueKey('loading-dots'),
-                        style: _labelStyle,
-                      );
-                    },
+                // Flexible: em tela estreita ou fonte grande o texto encolhe
+                // com "…" em vez de estourar a linha.
+                const Flexible(
+                  child: Text(
+                    'Preparando suas trilhas',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _labelStyle,
                   ),
+                ),
+                AnimatedBuilder(
+                  animation: _ambient,
+                  builder: (context, _) {
+                    final count = _reduceMotion
+                        ? 3
+                        : (_ambient.value * 15).floor() % 4;
+                    // Os pontos que faltam ficam transparentes, para o texto
+                    // não "pular" quando a quantidade muda.
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '.' * count,
+                          key: const ValueKey('loading-dots'),
+                          style: _labelStyle,
+                        ),
+                        Text(
+                          '.' * (3 - count),
+                          style: _labelStyle.copyWith(
+                              color: const Color(0x00FFFFFF)),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -419,7 +448,7 @@ class _SlideGradient extends GradientTransform {
       Matrix4.translationValues(bounds.width * dx, 0, 0);
 }
 
-/// Ocupa a tela inteira quando cabe (os `Spacer` distribuem o espaço);
+/// Ocupa a tela inteira quando cabe (o `spaceBetween` distribui o espaço);
 /// quando não cabe — tela pequena, paisagem, fonte grande — rola em vez
 /// de estourar.
 class _FitOrScroll extends StatelessWidget {
@@ -435,9 +464,9 @@ class _FitOrScroll extends StatelessWidget {
         physics: const ClampingScrollPhysics(),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: IntrinsicHeight(
-            child: Padding(padding: padding, child: child),
-          ),
+          // Sem IntrinsicHeight: ele errava a altura do texto que quebra
+          // linha (frase palavra por palavra) e a coluna estourava embaixo.
+          child: Padding(padding: padding, child: child),
         ),
       ),
     );
