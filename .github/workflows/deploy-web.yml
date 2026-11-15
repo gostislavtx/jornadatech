@@ -1,5 +1,5 @@
 # Publica a versão web do app no GitHub Pages a cada atualização da main.
-# Link: https://gostislavtx.github.io/jornadatech/
+# Link: https://jornadatech.dev.br/ (domínio próprio, configurado em Settings → Pages)
 name: Publicar versão web
 
 on:
@@ -32,8 +32,8 @@ jobs:
       # Só publica se os testes passarem.
       - run: flutter test
 
-      # O site fica em /jornadatech/, por isso o base-href.
-      - run: flutter build web --release --base-href /jornadatech/
+      # Com o domínio próprio o site fica na raiz (/).
+      - run: flutter build web --release --base-href /
 
       - uses: actions/upload-pages-artifact@v3
         with:
