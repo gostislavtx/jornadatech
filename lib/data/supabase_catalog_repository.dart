@@ -52,6 +52,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
           if (t['offline'] == true) TrilhaFilter.offline,
         },
         currentLesson: current,
+        lessons: aulas,
       ));
     }
     return trilhas;
@@ -64,6 +65,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
     return Lesson(
       id: a['id'] as String,
       status: status,
+      url: a['url'] as String?,
       number: a['numero'] as int,
       title: a['titulo'] as String,
       source: a['fonte'] as String,
@@ -82,6 +84,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
               'video' => Icons.play_circle_outline_rounded,
               _ => Icons.language_rounded,
             },
+            url: r['url'] as String?,
           ),
       ],
     );
