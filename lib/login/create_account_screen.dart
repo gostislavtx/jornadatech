@@ -39,7 +39,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    final account = await widget.auth.signUp(_username, _passCtrl.text);
+    final AccountWithCode? account;
+    try {
+      account = await widget.auth.signUp(_username, _passCtrl.text);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showAppSnack(context, 'Não foi possível criar a conta. Tente de novo.');
+      return;
+    }
     if (!mounted) return;
     setState(() => _loading = false);
 
@@ -49,9 +57,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       showAppSnack(context, 'Esse nome acabou de ser usado. Geramos outro.');
       return;
     }
+    // Variável não-nula para usar dentro do builder (closure).
+    final created = account;
     Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
       builder: (_) => RecoveryCodeScreen(
-        account: account,
+        account: created,
         onContinue: (user) => widget.onDone?.call(user),
       ),
     ));

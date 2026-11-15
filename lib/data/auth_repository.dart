@@ -37,38 +37,90 @@ class AccountWithCode {
   final String recoveryCode;
 }
 
-/// Autenticação de demonstração, em memória (sem back-end).
-///
-/// MOCK: será trocado pelo Supabase mantendo os mesmos métodos. Lá a senha e
-/// o código de recuperação ficam só como hash, nunca em texto puro.
-class AuthRepository {
-  AuthRepository.demo({Random? random})
-      : _random = random ?? Random.secure(),
-        _accounts = {
-          _key(demoUsername): _Account(
-            const AppUser(username: demoUsername),
-            password: demoPassword,
-            recoveryCode: demoRecoveryCode,
-          ),
-        };
+/// Muitas tentativas erradas de código de recuperação: conta bloqueada por
+/// alguns minutos.
+class AuthBlockedException implements Exception {
+  const AuthBlockedException();
+}
 
-  /// Instância usada pelo app (os testes criam a própria).
-  static final shared = AuthRepository.demo();
+/// Contas: login, criar conta, recuperar senha e sair.
+///
+/// Duas implementações: [MockAuthRepository] (em memória, para testes e para
+/// rodar sem internet) e `SupabaseAuthRepository` (banco de verdade).
+abstract class AuthRepository {
+  /// Repositório em memória, com a conta de demonstração.
+  factory AuthRepository.demo({Random? random}) = MockAuthRepository;
+
+  /// Instância usada pelo app. O `main.dart` troca pelo Supabase; os testes
+  /// passam a própria.
+  static AuthRepository shared = MockAuthRepository();
 
   /// Conta pronta para testar o app (listada no README).
   static const demoUsername = 'CorujaAzul42';
   static const demoPassword = 'trilha2026';
   static const demoRecoveryCode = 'K7M2-QX9P';
 
-  /// Simula a ida ao servidor.
+  /// Tempo simulado de ida ao servidor (só no mock).
   static const latency = Duration(milliseconds: 600);
+
+  /// Aluno com sessão salva (para pular o login), ou `null`.
+  AppUser? get currentUser;
+
+  /// Sugere um nome de usuário aleatório.
+  String suggestUsername();
+
+  /// Entrar com nome de usuário + senha.
+  Future<LoginResult> login(String username, String password);
+
+  /// Cria a conta com o nome sugerido e devolve o código de recuperação.
+  /// Devolve `null` se o nome já estiver em uso.
+  Future<AccountWithCode?> signUp(String username, String password);
+
+  /// Redefine a senha com o código de recuperação; o código antigo deixa de
+  /// valer e um novo é gerado. Devolve `null` se o nome ou o código não
+  /// conferem. Lança [AuthBlockedException] depois de muitas tentativas.
+  Future<AccountWithCode?> resetPassword({
+    required String username,
+    required String recoveryCode,
+    required String newPassword,
+  });
+
+  /// Sair da conta.
+  Future<void> logout();
+
+  /// Regras da senha. Devolve a mensagem de erro, ou `null` se estiver ok.
+  static String? validatePassword(String value) {
+    if (value.length < 8) return 'Use pelo menos 8 caracteres';
+    if (!RegExp(r'[A-Za-z]').hasMatch(value) ||
+        !RegExp(r'\d').hasMatch(value)) {
+      return 'Use letras e números';
+    }
+    return null;
+  }
+}
+
+/// Autenticação em memória (sem back-end): usada nos testes e quando o app
+/// roda com `--dart-define=USE_MOCK=true`.
+class MockAuthRepository implements AuthRepository {
+  MockAuthRepository({Random? random})
+      : _random = random ?? Random.secure(),
+        _accounts = {
+          _key(AuthRepository.demoUsername): _Account(
+            const AppUser(username: AuthRepository.demoUsername),
+            password: AuthRepository.demoPassword,
+            recoveryCode: AuthRepository.demoRecoveryCode,
+          ),
+        };
 
   final Random _random;
   final Map<String, _Account> _accounts;
 
   static String _key(String username) => username.trim().toLowerCase();
 
-  /// Sugere um nome de usuário que ainda não existe.
+  @override
+  AppUser? get currentUser => null;
+
+  @override
   String suggestUsername() {
     final generator = UsernameGenerator(_random);
     while (true) {
@@ -77,9 +129,9 @@ class AuthRepository {
     }
   }
 
-  /// Entrar com nome de usuário + senha.
+  @override
   Future<LoginResult> login(String username, String password) async {
-    await Future<void>.delayed(latency);
+    await Future<void>.delayed(AuthRepository.latency);
     final account = _accounts[_key(username)];
     if (account == null || account.password != password) {
       return const LoginInvalid();
@@ -87,28 +139,24 @@ class AuthRepository {
     return LoginOk(account.user);
   }
 
-  /// Cria a conta com o nome sugerido e devolve o código de recuperação.
-  /// Devolve `null` se alguém pegou esse nome nesse meio-tempo.
+  @override
   Future<AccountWithCode?> signUp(String username, String password) async {
-    await Future<void>.delayed(latency);
+    await Future<void>.delayed(AuthRepository.latency);
     final key = _key(username);
     if (_accounts.containsKey(key)) return null;
     final user = AppUser(username: username.trim());
     final code = generateRecoveryCode(_random);
-    _accounts[key] =
-        _Account(user, password: password, recoveryCode: code);
+    _accounts[key] = _Account(user, password: password, recoveryCode: code);
     return AccountWithCode(user, code);
   }
 
-  /// Redefine a senha com o código de recuperação. O código antigo deixa de
-  /// valer e um novo é gerado. Devolve `null` se o nome ou o código não
-  /// conferem.
+  @override
   Future<AccountWithCode?> resetPassword({
     required String username,
     required String recoveryCode,
     required String newPassword,
   }) async {
-    await Future<void>.delayed(latency);
+    await Future<void>.delayed(AuthRepository.latency);
     final account = _accounts[_key(username)];
     if (account == null ||
         account.recoveryCode != normalizeRecoveryCode(recoveryCode)) {
@@ -121,15 +169,8 @@ class AuthRepository {
     return AccountWithCode(account.user, code);
   }
 
-  /// Regras da senha. Devolve a mensagem de erro, ou `null` se estiver ok.
-  static String? validatePassword(String value) {
-    if (value.length < 8) return 'Use pelo menos 8 caracteres';
-    if (!RegExp(r'[A-Za-z]').hasMatch(value) ||
-        !RegExp(r'\d').hasMatch(value)) {
-      return 'Use letras e números';
-    }
-    return null;
-  }
+  @override
+  Future<void> logout() async {}
 }
 
 class _Account {

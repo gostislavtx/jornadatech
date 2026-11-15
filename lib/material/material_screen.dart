@@ -1,25 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/catalog.dart';
+import '../data/catalog_repository.dart';
 import '../ui/app_tokens.dart';
 import '../ui/app_widgets.dart';
 
-/// Tela 03 do Figma — Material da trilha (aula atual).
+/// Tela 03 do Figma — Material da trilha.
+///
+/// Abre na aula atual (a primeira não concluída). A lista "Aulas desta
+/// trilha", no fim da tela, troca de aula.
 class MaterialScreen extends StatefulWidget {
-  const MaterialScreen({super.key, required this.trilha});
+  const MaterialScreen({
+    super.key,
+    required this.trilha,
+    this.lesson,
+    this.catalog,
+  });
 
   final Trilha trilha;
+
+  /// Aula a abrir. Padrão: a aula atual da trilha.
+  final Lesson? lesson;
+
+  /// Onde gravar o progresso. Padrão: [CatalogRepository.shared].
+  final CatalogRepository? catalog;
 
   @override
   State<MaterialScreen> createState() => _MaterialScreenState();
 }
 
 class _MaterialScreenState extends State<MaterialScreen> {
-  LessonStatus _status = LessonStatus.naoVisto;
+  final _scroll = ScrollController();
+  late final List<Lesson> _lessons = [...widget.trilha.allLessons];
+  late int _index = _indexOf(widget.lesson ?? widget.trilha.currentLesson);
   bool _savedOffline = false;
 
-  Lesson get _lesson => widget.trilha.currentLesson;
+  Lesson get _lesson => _lessons[_index];
+  LessonStatus get _status => _lesson.status;
+
+  CatalogRepository get _catalog => widget.catalog ?? CatalogRepository.shared;
+
+  int _indexOf(Lesson lesson) {
+    final i = _lessons.indexWhere((l) => l.number == lesson.number);
+    return i < 0 ? 0 : i;
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// Marca na hora e grava no banco; se falhar, volta ao anterior e avisa.
+  Future<void> _setStatus(LessonStatus status) async {
+    final index = _index;
+    final previous = _lessons[index];
+    setState(() => _lessons[index] = previous.withStatus(status));
+    try {
+      await _catalog.setLessonStatus(previous, status);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _lessons[index] = previous);
+      showAppSnack(context, 'Não foi possível salvar o progresso.');
+    }
+  }
+
+  /// Abre o link no navegador / app (YouTube, site, curso).
+  Future<bool> _openUrl(String? url) async {
+    final uri = url == null ? null : Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) {
+      showAppSnack(context, 'O link deste conteúdo ainda não foi cadastrado.');
+      return false;
+    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showAppSnack(context, 'Não foi possível abrir o link.');
+    return ok;
+  }
+
+  /// Play: abre a aula e, se ainda não tinha visto, marca como "Visto".
+  Future<void> _openLesson() async {
+    final opened = await _openUrl(_lesson.url);
+    if (opened && mounted && _status == LessonStatus.naoVisto) {
+      await _setStatus(LessonStatus.visto);
+    }
+  }
+
+  void _selectLesson(int index) {
+    if (index == _index) return;
+    setState(() {
+      _index = index;
+      _savedOffline = false;
+    });
+    _scroll.animateTo(0,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +104,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
+          controller: _scroll,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -104,8 +181,8 @@ class _MaterialScreenState extends State<MaterialScreen> {
               button: true,
               label: 'Abrir material',
               child: GestureDetector(
-                onTap: () => showAppSnack(
-                    context, 'Abrindo "${_lesson.title}" no ${_lesson.source}…'),
+                key: const ValueKey('play'),
+                onTap: _openLesson,
                 child: const PlayBadge(),
               ),
             ),
@@ -183,6 +260,13 @@ class _MaterialScreenState extends State<MaterialScreen> {
           _relatedTile(item),
           const SizedBox(height: 8),
         ],
+        const SizedBox(height: 16),
+        Text('Aulas desta trilha', style: AppText.sora(14, height: 20)),
+        const SizedBox(height: 12),
+        for (var i = 0; i < _lessons.length; i++) ...[
+          _lessonTile(i),
+          const SizedBox(height: 8),
+        ],
         const SizedBox(height: 12),
         _feedback(),
       ],
@@ -245,7 +329,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
           key: ValueKey('status-${s.name}'),
           customBorder: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14)),
-          onTap: () => setState(() => _status = s),
+          onTap: () => _setStatus(s),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(
@@ -308,7 +392,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
       child: InkWell(
         customBorder:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        onTap: () => showAppSnack(context, 'Abrindo "${item.title}"…'),
+        onTap: () => _openUrl(item.url),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -342,6 +426,56 @@ class _MaterialScreenState extends State<MaterialScreen> {
               const SizedBox(width: 12),
               const Icon(Icons.radio_button_unchecked,
                   size: 16, color: AppColors.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Uma aula na lista: status, número e título. A atual fica destacada.
+  Widget _lessonTile(int index) {
+    final l = _lessons[index];
+    final current = index == _index;
+    final (IconData icon, Color color) = switch (l.status) {
+      LessonStatus.concluido => (Icons.check_circle_rounded, AppColors.orange),
+      LessonStatus.visto => (Icons.visibility_outlined, AppColors.accentInk),
+      LessonStatus.naoVisto => (Icons.radio_button_unchecked, AppColors.muted),
+    };
+    return Material(
+      color: current ? AppColors.orangeSoft : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+            color: current ? AppColors.orange : AppColors.border),
+      ),
+      child: InkWell(
+        key: ValueKey('aula-${l.number}'),
+        customBorder:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        onTap: () => _selectLesson(index),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: color, semanticLabel: l.status.label),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Aula ${l.number} · ${l.title}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.manrope(13,
+                            weight: FontWeight.w600,
+                            color: AppColors.ink,
+                            height: 19.5)),
+                    Text('${l.source} · ${l.minutes} min',
+                        style: AppText.manrope(11, height: 16.5)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

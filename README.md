@@ -49,13 +49,13 @@ Pesquisa aplicada e exploratória, conduzida pela abordagem **Design Science Res
 | Tela | O que tem | Status |
 |---|---|---|
 | Splash | Logo animado, degradê da marca e respeito a "reduzir movimento" | ✅ |
-| 01 · Login | Nome de usuário aleatório + senha, criar conta, código de recuperação e "Esqueci minha senha", sem dados pessoais ([LGPD](#privacidade-e-lgpd)) | ✅ (mock) |
-| 02 · Home | Trilhas recomendadas com progresso, busca, filtros (grátis, certificado, vídeo, offline) e favoritos | ✅ (mock) |
+| 01 · Login | Nome de usuário aleatório + senha, criar conta, código de recuperação e "Esqueci minha senha", sem dados pessoais ([LGPD](#privacidade-e-lgpd)) | ✅ |
+| 02 · Home | Trilhas recomendadas com progresso, busca, filtros (grátis, certificado, vídeo, offline) e favoritos | ✅ |
 | Menu | Perfil, Ajuda e Sair | 🟡 Perfil ainda não existe |
 | Ajuda | Como a trilha é montada e tutorial de uso | 🟡 vídeo pendente |
-| 03 · Material | Aula atual, "Cobre da ementa", progresso (Não visto / Visto / Concluído), salvar offline, conteúdos relacionados e feedback | ✅ (mock) |
+| 03 · Material | Aula atual, "Cobre da ementa", progresso (Não visto / Visto / Concluído), salvar offline, conteúdos relacionados e feedback | ✅ |
 
-> **Mock:** por enquanto, usuários, trilhas e progresso ficam em memória (`lib/data/`). Ao fechar o app, tudo volta ao estado inicial.
+> **Banco de dados:** contas, trilhas, progresso e favoritos ficam no **Supabase** ([como configurar](supabase/README.md)). Para rodar sem banco, com dados de exemplo em memória: `flutter run -d chrome --dart-define=USE_MOCK=true`.
 
 ### Conta de teste
 
@@ -85,6 +85,8 @@ No back-end (Supabase), a senha e o código ficam guardados só como **hash**, n
 
 ## Tecnologias
 
+- [Supabase](https://supabase.com) (PostgreSQL) para contas, trilhas, progresso e favoritos, com regras de segurança por aluno (RLS)
+
 - [Flutter](https://flutter.dev) / Dart 3 (Android, iOS e web)
 - `flutter_native_splash` para a tela do sistema antes do Flutter abrir
 - Fontes Sora e Manrope (licença OFL, em `assets/fonts/`)
@@ -106,6 +108,8 @@ dart run flutter_native_splash:create
 flutter analyze
 flutter test
 flutter run            # ou: flutter run -d chrome
+# sem banco (dados de exemplo em memória):
+# flutter run -d chrome --dart-define=USE_MOCK=true
 ```
 
 ## Estrutura do projeto
@@ -120,7 +124,8 @@ lib/
 │   ├── trilhas_page.dart         # tela 02: trilhas, busca, filtros, favoritos
 │   └── ajuda_page.dart           # aba Ajuda
 ├── material/material_screen.dart # tela 03: material da trilha
-├── data/                         # mocks (auth, trilhas) e gerador de nome de usuário
+├── config/                       # conexão com o Supabase
+├── data/                         # contas e catálogo (Supabase + mock) e gerador de nome de usuário
 └── ui/                           # cores, textos e componentes do Figma
 test/                             # testes de widget (splash, login, home)
 docs/                             # banner e protótipo
@@ -160,7 +165,7 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 ## Próximos passos
 
 - [ ] Rodar `flutter analyze` e `flutter test` na máquina de todos e corrigir o que aparecer
-- [ ] Back-end no Supabase para contas, trilhas e progresso (senha e código só como hash)
+- [x] Back-end no Supabase para contas, trilhas, progresso e favoritos (senha e código só como hash)
 - [ ] Redefinição de senha pelo professor/monitor da turma
 - [ ] Cadastro das trilhas reais a partir da curadoria (confiabilidade, gratuidade, atualização, dificuldade)
 - [ ] Tela de Perfil

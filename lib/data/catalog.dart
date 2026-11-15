@@ -13,21 +13,30 @@ enum TrilhaFilter {
 
 /// Situação de uma aula para o aluno ("Meu progresso").
 enum LessonStatus {
-  naoVisto('Não visto', Icons.radio_button_unchecked),
-  visto('Visto', Icons.visibility_outlined),
-  concluido('Concluído', Icons.check_rounded);
+  naoVisto('Não visto', Icons.radio_button_unchecked, 'nao_visto'),
+  visto('Visto', Icons.visibility_outlined, 'visto'),
+  concluido('Concluído', Icons.check_rounded, 'concluido');
 
-  const LessonStatus(this.label, this.icon);
+  const LessonStatus(this.label, this.icon, this.dbValue);
   final String label;
   final IconData icon;
+
+  /// Valor gravado na coluna `progresso.status` do banco.
+  final String dbValue;
+
+  static LessonStatus fromDb(String? value) => LessonStatus.values
+      .firstWhere((s) => s.dbValue == value, orElse: () => naoVisto);
 }
 
 /// Conteúdo extra em "Continue nesta trilha".
 class RelatedItem {
-  const RelatedItem(this.title, this.subtitle, this.icon);
+  const RelatedItem(this.title, this.subtitle, this.icon, {this.url});
   final String title;
   final String subtitle;
   final IconData icon;
+
+  /// Link do conteúdo; `null` = ainda não cadastrado.
+  final String? url;
 }
 
 /// Aula/material aberto na tela "Material da trilha".
@@ -42,7 +51,35 @@ class Lesson {
     required this.syllabus,
     required this.related,
     this.isVideo = true,
+    this.id,
+    this.status = LessonStatus.naoVisto,
+    this.url,
   });
+
+  /// Link do conteúdo da aula; `null` = ainda não cadastrado.
+  final String? url;
+
+  /// Cópia com outro status (usado depois de marcar o progresso).
+  Lesson withStatus(LessonStatus status) => Lesson(
+        number: number,
+        title: title,
+        source: source,
+        isFree: isFree,
+        hasCertificate: hasCertificate,
+        minutes: minutes,
+        syllabus: syllabus,
+        related: related,
+        isVideo: isVideo,
+        id: id,
+        status: status,
+        url: url,
+      );
+
+  /// Id da aula no banco (`aulas.id`); `null` nos dados de exemplo.
+  final String? id;
+
+  /// Situação desta aula para o aluno logado.
+  final LessonStatus status;
 
   final int number;
   final String title;
@@ -68,9 +105,16 @@ class Trilha {
     required this.total,
     required this.tags,
     required this.currentLesson,
+    this.lessons = const [],
   });
 
   final String id;
+
+  /// Todas as aulas já cadastradas, em ordem. Vazio = só a aula atual.
+  final List<Lesson> lessons;
+
+  /// Aulas para a lista "Aulas desta trilha".
+  List<Lesson> get allLessons => lessons.isEmpty ? [currentLesson] : lessons;
 
   /// Sobretítulo do card ("Metamorfose · Módulo 2").
   final String origin;

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../data/auth_repository.dart';
 import '../data/catalog.dart';
+import '../data/catalog_repository.dart';
+import '../material/material_screen.dart';
 import '../ui/app_tokens.dart';
 import '../ui/app_widgets.dart';
 import 'ajuda_page.dart';
@@ -13,12 +15,14 @@ class HomeShell extends StatefulWidget {
   const HomeShell({
     super.key,
     required this.user,
-    this.trilhas = demoTrilhas,
+    this.catalog,
     this.onLogout,
   });
 
   final AppUser user;
-  final List<Trilha> trilhas;
+
+  /// Padrão: [CatalogRepository.shared]. Os testes passam o mock.
+  final CatalogRepository? catalog;
   final VoidCallback? onLogout;
 
   @override
@@ -29,8 +33,56 @@ class _HomeShellState extends State<HomeShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _tab = 0;
 
-  /// Favoritos ficam aqui para não se perderem ao trocar de aba.
-  final Set<String> _favorites = {};
+  List<Trilha>? _trilhas;
+  Set<String> _favorites = {};
+  bool _error = false;
+
+  CatalogRepository get _catalog => widget.catalog ?? CatalogRepository.shared;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  /// Busca trilhas, progresso e favoritos (de novo ao voltar do material).
+  Future<void> _load() async {
+    try {
+      final results = await Future.wait([
+        _catalog.trilhas(),
+        _catalog.favoritos(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _trilhas = results[0] as List<Trilha>;
+        _favorites = results[1] as Set<String>;
+        _error = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = true);
+    }
+  }
+
+  /// Marca na hora e grava no banco; se falhar, desfaz e avisa.
+  Future<void> _toggleFavorite(String id) async {
+    final favorite = !_favorites.contains(id);
+    setState(() => favorite ? _favorites.add(id) : _favorites.remove(id));
+    try {
+      await _catalog.setFavorito(id, favorite);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => favorite ? _favorites.remove(id) : _favorites.add(id));
+      showAppSnack(context, 'Não foi possível salvar o favorito.');
+    }
+  }
+
+  Future<void> _openTrilha(Trilha trilha) async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => MaterialScreen(trilha: trilha, catalog: _catalog),
+    ));
+    if (mounted) _load(); // atualiza o progresso
+  }
 
   void _openMenu() => _scaffoldKey.currentState?.openEndDrawer();
 
@@ -57,11 +109,15 @@ class _HomeShellState extends State<HomeShell> {
           children: [
             TrilhasPage(
               user: widget.user,
-              trilhas: widget.trilhas,
+              trilhas: _trilhas,
+              error: _error,
+              onRetry: () {
+                setState(() => _error = false);
+                _load();
+              },
               favorites: _favorites,
-              onToggleFavorite: (id) => setState(() {
-                if (!_favorites.remove(id)) _favorites.add(id);
-              }),
+              onToggleFavorite: _toggleFavorite,
+              onOpenTrilha: _openTrilha,
               onMenu: _openMenu,
             ),
             AjudaPage(user: widget.user, onMenu: _openMenu),
