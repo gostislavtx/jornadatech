@@ -22,7 +22,8 @@ export 'widgets/jornada_logo.dart' show JornadaLogo;
 class JornadaSplashScreen extends StatefulWidget {
   const JornadaSplashScreen({
     super.key,
-    this.minDuration = const Duration(milliseconds: 2200),
+    // 4 s: tempo para ler a frase inteira antes de ir para o login.
+    this.minDuration = const Duration(milliseconds: 4000),
     this.initialize,
     this.onFinished,
   });

@@ -49,7 +49,8 @@ void main() {
     );
     expect(find.text('Preparando suas trilhas'), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 2));
+    // Espera o tempo mínimo (4 s) terminar.
+    await tester.pump(const Duration(seconds: 3));
     semantics.dispose();
   });
 
@@ -151,7 +152,7 @@ void main() {
       await tester.pumpWidget(
         _host(const JornadaSplashScreen(), textScale: scale),
       );
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(seconds: 5));
       expect(tester.takeException(), isNull);
     });
   }

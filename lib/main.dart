@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -18,7 +19,9 @@ Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   // A tela do sistema é só a cor azul (sem logo): segura até o 1º quadro
   // do Flutter e some direto no splash animado.
-  FlutterNativeSplash.preserve(widgetsBinding: binding);
+  // Na web não existe a tela do sistema (web: false no
+  // flutter_native_splash.yaml), então só segura no Android/iOS.
+  if (!kIsWeb) FlutterNativeSplash.preserve(widgetsBinding: binding);
   // O degradê vai até atrás das barras do sistema.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -52,7 +55,9 @@ class _JornadaTechAppState extends State<JornadaTechApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance
-        .addPostFrameCallback((_) => FlutterNativeSplash.remove());
+        .addPostFrameCallback((_) {
+      if (!kIsWeb) FlutterNativeSplash.remove();
+    });
   }
 
   @override
