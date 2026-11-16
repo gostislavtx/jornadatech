@@ -135,15 +135,15 @@ docs/                             # banner e protótipo
 
 Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação · Centro Universitário Cesuca
 
-> Cada integrante preenche a própria linha com o que desenvolveu (pode abrir um PR só para isso).
+> Cada integrante pode completar a própria linha (e o usuário do GitHub) com um PR.
 
 | Integrante | GitHub | O que desenvolveu |
 |---|---|---|
-| Andrius Nazario | `@___` | _a preencher_ |
-| Giovane Antunes Boaro | `@___` | _a preencher_ |
-| Leonardo Severino Ruschel | `@___` | Proposta do login sem dados pessoais (LGPD); _a preencher_ |
-| Luiz Gustavo Bonapaz Teixeira | `@gostislavtx` | Início do desenvolvimento do app em Flutter a partir do protótipo do Figma; criação e organização do repositório e do README; _a completar_ |
-| Maruan Farid Linden | `@___` | _a preencher_ |
+| Andrius Nazario | `@ajfntigit` | Idealização do projeto, documentação e apresentação (participa do Projeto Metamorfose); banco de dados no Supabase e importação do conteúdo |
+| Giovane Antunes Boaro | `@___` | Telas do protótipo no Figma; curadoria e revisão das aulas |
+| Leonardo Severino Ruschel | `@___` | Idealização do projeto, documentação e apresentação (participa do Projeto Metamorfose); proposta do login sem dados pessoais (LGPD); definição das trilhas |
+| Luiz Gustavo Bonapaz Teixeira | `@gostislavtx` | Desenvolvimento do app em Flutter a partir do protótipo do Figma; login anônimo, banco de dados (Supabase), publicação web e domínio; repositório, README e revisão dos PRs |
+| Maruan Farid Linden | `@___` | Telas do protótipo no Figma; curadoria e revisão das aulas |
 
 ### Orientação
 
@@ -167,7 +167,7 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 - [ ] Rodar `flutter analyze` e `flutter test` na máquina de todos e corrigir o que aparecer
 - [x] Back-end no Supabase para contas, trilhas, progresso e favoritos (senha e código só como hash)
 - [ ] Redefinição de senha pelo professor/monitor da turma
-- [ ] Cadastro das trilhas reais a partir da curadoria (confiabilidade, gratuidade, atualização, dificuldade)
+- [x] Cadastro das trilhas reais a partir da curadoria (confiabilidade, gratuidade, atualização, dificuldade)
 - [ ] Tela de Perfil
 - [ ] Download real para estudo offline
 - [ ] Vídeo do tutorial na aba Ajuda
