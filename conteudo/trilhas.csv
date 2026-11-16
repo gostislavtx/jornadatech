@@ -1,2 +1,6 @@
 trilha_id,origem,titulo,total_aulas,gratis,certificado,video,offline,ordem
-logica,Metamorfose · Módulo 2,Lógica de Programação,12,sim,não,sim,sim,1
+fundamentos_informatica,Projeto Metamorfose,Fundamentos da Informática,7,sim,sim,sim,sim,1
+produtividade_digital,Projeto Metamorfose,Produtividade Digital,6,sim,sim,sim,não,2
+ferramentas_google,Projeto Metamorfose,Ferramentas Google,7,sim,não,não,não,3
+hardware,Projeto Metamorfose,Hardware e Arquitetura de Computadores,5,sim,sim,sim,sim,4
+desenvolvimento_web,Projeto Metamorfose,Introdução ao Desenvolvimento Web,7,sim,sim,sim,sim,5

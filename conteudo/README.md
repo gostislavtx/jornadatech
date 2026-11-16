@@ -1,6 +1,8 @@
 # Curadoria do conteúdo
 
-Aqui ficam os **modelos da planilha** que o grupo preenche com as trilhas e aulas reais. Cada arquivo `.csv` vira uma aba da planilha e depois é importado no banco (Supabase).
+Aqui ficam as **abas da planilha** de curadoria. Cada arquivo `.csv` vira uma aba da planilha e depois é importado no banco (Supabase).
+
+Os arquivos já vêm com a curadoria das 5 trilhas: trilhas definidas pelo Leonardo, aulas e conteúdos escolhidos pelo Giovane (32 aulas e 44 conteúdos extras, todos gratuitos). Para colocar no banco sem passar pela planilha, use [`supabase/conteudo_inicial.sql`](../supabase/conteudo_inicial.sql), que tem os mesmos dados.
 
 ## Como funciona
 
