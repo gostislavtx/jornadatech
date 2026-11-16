@@ -66,6 +66,9 @@ class _JornadaTechAppState extends State<JornadaTechApp> {
       title: 'JornadaTech',
       navigatorKey: _navigator,
       debugShowCheckedModeBanner: false,
+      // No computador o app fica numa coluna do tamanho de um celular, no
+      // centro da tela, em vez de esticar os cartões na largura toda.
+      builder: (context, child) => _ColunaCelular(child: child!),
       theme: ThemeData(
         fontFamily: kManrope,
         scaffoldBackgroundColor: AppColors.background,
@@ -120,5 +123,36 @@ class _JornadaTechAppState extends State<JornadaTechApp> {
   Future<void> _carregarDadosIniciais() async {
     // Coloque aqui o que o app precisa antes de abrir (ex.: materiais
     // offline). A sessão salva já é restaurada pelo Supabase.initialize.
+  }
+}
+
+/// Limita a largura do app a [larguraMaxima] em telas grandes (web no
+/// computador). No celular não muda nada.
+class _ColunaCelular extends StatelessWidget {
+  const _ColunaCelular({required this.child});
+
+  static const larguraMaxima = 480.0;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    if (media.size.width <= larguraMaxima) return child;
+    return ColoredBox(
+      color: AppColors.mutedBg,
+      child: Center(
+        child: SizedBox(
+          width: larguraMaxima,
+          child: MediaQuery(
+            // Quem mede a tela (ex.: largura do menu) vê só a coluna.
+            data: media.copyWith(
+              size: Size(larguraMaxima, media.size.height),
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 }

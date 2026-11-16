@@ -26,20 +26,19 @@ class AjudaPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Elaborando Sua Trilha',
+              Text('Como montamos sua trilha',
                   style: AppText.sora(16, height: 24)),
               const SizedBox(height: 4),
-              // O Figma tem "Lorem ipsum" aqui; este é um texto provisório
-              // de verdade, para o grupo revisar.
+              // Só descreve o que o app já faz (sem offline nem feedback,
+              // que ainda não existem).
               Text(
-                'Cada trilha parte da ementa da sua disciplina no Cesuca ou no '
-                'Metamorfose. Para cada unidade, a equipe escolhe poucos '
-                'conteúdos abertos e gratuitos — vídeos, cursos e exercícios — '
-                'que aprofundam o que foi visto em aula.\n\n'
-                'Marque cada material como "Visto" ou "Concluído" para '
-                'acompanhar seu progresso, salve os que quiser estudar sem '
-                'internet e favorite as trilhas que você mais usa. Achou um '
-                'link quebrado? Use "Enviar feedback" na tela do material.',
+                'Cada trilha parte da ementa das aulas do Metamorfose. Para '
+                'cada unidade, a equipe escolhe poucos conteúdos abertos e '
+                'gratuitos (vídeos, cursos e sites confiáveis) que aprofundam '
+                'o que foi visto em aula.\n\n'
+                'Toque no play para abrir o conteúdo, marque cada aula como '
+                '"Visto" ou "Concluído" para acompanhar seu progresso e '
+                'favorite as trilhas que você mais usa.',
                 style: AppText.manrope(12, height: 18),
               ),
               const SizedBox(height: 16),

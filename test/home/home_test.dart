@@ -30,7 +30,7 @@ void main() {
     expect(find.text('Bom estudo,'), findsOneWidget);
     expect(find.text('CorujaAzul42'), findsOneWidget);
     expect(find.text('Lógica de Programação'), findsOneWidget);
-    expect(find.text('9 de 12 itens'), findsOneWidget);
+    expect(find.text('9 de 12 aulas'), findsOneWidget);
     expect(find.text('75% concluído'), findsOneWidget);
   });
 
