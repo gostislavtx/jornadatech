@@ -139,11 +139,11 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 
 | Integrante | GitHub | O que desenvolveu |
 |---|---|---|
-| Andrius Nazario | `@ajfntigit` | Idealização do projeto, documentação e apresentação (participa do Projeto Metamorfose); banco de dados no Supabase e importação do conteúdo |
-| Giovane Antunes Boaro | `@___` | Telas do protótipo no Figma; curadoria das aulas e conteúdos das 5 trilhas (32 aulas e 44 conteúdos extras) |
-| Leonardo Severino Ruschel | `@___` | Idealização do projeto, documentação e apresentação (participa do Projeto Metamorfose); proposta do login sem dados pessoais (LGPD); definição das trilhas |
-| Luiz Gustavo Bonapaz Teixeira | `@gostislavtx` | Desenvolvimento do app em Flutter a partir do protótipo do Figma; login anônimo, banco de dados (Supabase), publicação web e domínio; repositório, README e revisão dos PRs |
-| Maruan Farid Linden | `@___` | Telas do protótipo no Figma |
+| Andrius Nazario | `@ajfntigit` | Idealização do projeto (participa do Projeto Metamorfose); documentação e apresentação na Mostra |
+| Giovane Antunes Boaro | `@GiovaneBoaro` | Telas do protótipo no Figma, base visual do app; curadoria das aulas e conteúdos das 5 trilhas (32 aulas e 44 conteúdos extras) |
+| Leonardo Severino Ruschel | `@___` | Idealização do projeto (participa do Projeto Metamorfose); documentação e apresentação na Mostra; proposta do login sem dados pessoais (LGPD); definição das 5 trilhas; slides da apresentação final |
+| Luiz Gustavo Bonapaz Teixeira | `@gostislavtx` | Desenvolvimento do app em Flutter a partir do protótipo do Figma (abertura, login, trilhas, aula e ajuda); login sem dados pessoais com código de recuperação; banco de dados no Supabase (tabelas, regras de segurança e importação do conteúdo); publicação web no GitHub Pages com domínio próprio; testes automatizados; organização do repositório e das tarefas, revisão dos PRs |
+| Maruan Farid Linden | `@___` | Telas do protótipo no Figma, base visual do app |
 
 ### Orientação
 
