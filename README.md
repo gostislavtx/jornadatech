@@ -140,10 +140,10 @@ Tecnologia em Análise e Desenvolvimento de Sistemas e Ciência da Computação 
 | Integrante | GitHub | O que desenvolveu |
 |---|---|---|
 | Andrius Nazario | `@ajfntigit` | Idealização do projeto, documentação e apresentação (participa do Projeto Metamorfose); banco de dados no Supabase e importação do conteúdo |
-| Giovane Antunes Boaro | `@___` | Telas do protótipo no Figma; curadoria e revisão das aulas |
+| Giovane Antunes Boaro | `@___` | Telas do protótipo no Figma; curadoria das aulas e conteúdos das 5 trilhas (32 aulas e 44 conteúdos extras) |
 | Leonardo Severino Ruschel | `@___` | Idealização do projeto, documentação e apresentação (participa do Projeto Metamorfose); proposta do login sem dados pessoais (LGPD); definição das trilhas |
 | Luiz Gustavo Bonapaz Teixeira | `@gostislavtx` | Desenvolvimento do app em Flutter a partir do protótipo do Figma; login anônimo, banco de dados (Supabase), publicação web e domínio; repositório, README e revisão dos PRs |
-| Maruan Farid Linden | `@___` | Telas do protótipo no Figma; curadoria e revisão das aulas |
+| Maruan Farid Linden | `@___` | Telas do protótipo no Figma |
 
 ### Orientação
 

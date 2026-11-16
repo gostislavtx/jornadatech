@@ -32,7 +32,7 @@ A recuperação de senha é feita pela função `redefinir_senha_com_codigo`, qu
 
 ## Conteúdo das trilhas
 
-**Jeito mais rápido:** no SQL Editor, cole [`conteudo_inicial.sql`](conteudo_inicial.sql) e clique em **Run**. Ele cadastra as 5 trilhas da curadoria (18 aulas e os conteúdos extras), tira as 3 trilhas de exemplo do `seed.sql` e mostra no final quantas aulas entraram em cada trilha. Pode rodar de novo sem duplicar nada.
+**Jeito mais rápido:** no SQL Editor, cole [`conteudo_inicial.sql`](conteudo_inicial.sql) e clique em **Run**. Ele cadastra as 5 trilhas da curadoria (32 aulas e 44 conteúdos extras), tira as 3 trilhas de exemplo do `seed.sql` e mostra no final quantas aulas entraram em cada trilha. Pode rodar de novo sem duplicar nada.
 
 **Pela planilha:** depois de revisar as aulas na planilha de curadoria, siga o [`conteudo/README.md`](../conteudo/README.md). Antes da primeira importação, rode [`migracoes/002_importacao_conteudo.sql`](migracoes/002_importacao_conteudo.sql).
 
