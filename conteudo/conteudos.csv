@@ -1,2 +1,22 @@
 trilha_id,aula_numero,ordem,titulo,subtitulo,tipo,url
-logica,1,1,Beecrowd — exercícios iniciantes,Site,site,https://judge.beecrowd.com
+fundamentos_informatica,1,1,Curso de Hardware — Curso em Vídeo,YouTube · playlist,video,https://www.youtube.com/playlist?list=PLHz_AreHm4dn1JHgN9wpbIUhzZmycYQXW
+fundamentos_informatica,2,1,Curso de Redes — Curso em Vídeo,YouTube · playlist,video,https://www.youtube.com/playlist?list=PLHz_AreHm4dkd4lr9G0Up-W-YaHYdTDuP
+fundamentos_informatica,2,2,Lidando com arquivos,Site · MDN,site,https://developer.mozilla.org/pt-BR/docs/Learn_web_development/Getting_started/Environment_setup/Dealing_with_files
+fundamentos_informatica,3,1,Internet Segura para crianças e adolescentes,Site · CGI.br,site,https://internetsegura.br/criancas/
+fundamentos_informatica,3,2,Fascículos da Cartilha de Segurança,Site · CERT.br,site,https://cartilha.cert.br/fasciculos/
+produtividade_digital,1,1,Treinamento do Google Drive,Site · Google,site,https://support.google.com/a/users/answer/9282958?hl=pt-BR
+produtividade_digital,2,1,Treinamento do Google Documentos,Site · Google,site,https://support.google.com/a/users/answer/9282664?hl=pt-BR
+produtividade_digital,3,1,Treinamento do Google Planilhas,Site · Google,site,https://support.google.com/a/users/answer/9282959?hl=pt-BR
+produtividade_digital,3,2,Treinamento do Google Apresentações,Site · Google,site,https://support.google.com/a/users/answer/9282488?hl=pt-BR
+ferramentas_google,1,1,Treinamento do Google Agenda,Site · Google,site,https://support.google.com/a/users/answer/9247501?hl=pt-BR
+ferramentas_google,3,1,Treinamento do Google Apresentações,Site · Google,site,https://support.google.com/a/users/answer/9282488?hl=pt-BR
+ferramentas_google,4,1,Treinamento do Google Formulários,Site · Google,site,https://support.google.com/a/users/answer/9282666?hl=pt-BR
+ferramentas_google,4,2,Treinamento do Google Meet,Site · Google,site,https://support.google.com/a/users/answer/9282720?hl=pt-BR
+hardware,1,1,Noções de Hardware,Curso · 3h · com certificado,curso,https://cursa.app/pt/curso-gratuito/nocoes-de-hardware-bbaf
+hardware,1,2,Clube do Hardware,Site,site,https://www.clubedohardware.com.br/
+hardware,3,1,Como a web funciona,Site · MDN,site,https://developer.mozilla.org/pt-BR/docs/Learn_web_development/Getting_started/Web_standards/How_the_web_works
+desenvolvimento_web,1,1,Instalando os programas básicos,Site · MDN,site,https://developer.mozilla.org/pt-BR/docs/Learn_web_development/Getting_started/Environment_setup/Installing_software
+desenvolvimento_web,2,1,Curso HTML5 e CSS3 — Módulo 1,YouTube · playlist,video,https://www.youtube.com/playlist?list=PLHz_AreHm4dkZ9-atkcmcBaMZdmLHft8n
+desenvolvimento_web,3,1,Design responsivo (freeCodeCamp),Curso · com certificado,curso,https://www.freecodecamp.org/portuguese/learn/2022/responsive-web-design/
+desenvolvimento_web,4,1,Publicando seu site,Site · MDN,site,https://developer.mozilla.org/pt-BR/docs/Learn_web_development/Getting_started/Your_first_website/Publishing_your_website
+desenvolvimento_web,4,2,Curso de Algoritmos — Curso em Vídeo,YouTube · playlist,video,https://www.youtube.com/playlist?list=PLHz_AreHm4dmSj0MHol_aoNYCSGFqvfXV
